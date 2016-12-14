@@ -67,6 +67,10 @@ function s:CreateCallbacks()
         call s:EchoBar('stat', line)
     endfunction
 
+    function callbacks.stdout(msg)
+        " TODO: do something with stdout
+    endfunction
+
     function callbacks.success(...)
         let self._hasExited = 1
 

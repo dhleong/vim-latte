@@ -4,7 +4,13 @@ function! s:MochaRunner() dict
     let run = latte#util#NewRunState()
 
     function! OnOutput(channel, msg) closure
-        let line = json_decode(a:msg)
+        try
+            let line = json_decode(a:msg)
+        catch
+            call self.stdout(a:msg)
+            return
+        endtry
+
         let type = line[0]
         let info = line[1]
         if type == 'start'
