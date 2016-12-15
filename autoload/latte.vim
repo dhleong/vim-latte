@@ -103,12 +103,17 @@ function s:CreateCallbacks()
             lopen
         endif
 
-        let firstError = locList[0]
-        call s:EchoBar('fail', firstError.text)
-
-        if latte#Config('jump_to_error')
-            call setpos('.', [firstError.bufnr, firstError.lnum, firstError.col, 0])
+        if len(locList)
+            let firstError = locList[0]
+            call s:EchoBar('fail', firstError.text)
+            if latte#Config('jump_to_error')
+                call setpos('.', [firstError.bufnr, firstError.lnum, firstError.col, 0])
+            endif
+        else
+            " TODO
+            call s:EchoBar('fail', 'Error')
         endif
+
     endfunction
 
     return callbacks
