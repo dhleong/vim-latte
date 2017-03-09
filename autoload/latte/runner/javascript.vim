@@ -11,6 +11,11 @@ function! s:MochaRunner() dict
             return
         endtry
 
+        if type(line) == v:t_none
+            call self.stdout(a:msg)
+            return
+        endif
+
         let type = line[0]
         let info = line[1]
         if type == 'start'
