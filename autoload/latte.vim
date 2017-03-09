@@ -56,6 +56,12 @@ function s:CreateCallbacks()
         let state = a:state
         let finished = state.passed + state.failed
         if self._hasExited
+            " re-echo exit status
+            if self._exitSuccess
+                call self.success()
+            else
+                call self.failure()
+            endif
             return
         endif
 
@@ -73,6 +79,7 @@ function s:CreateCallbacks()
 
     function callbacks.success(...)
         let self._hasExited = 1
+        let self._exitSuccess = 1
 
         echo ""
         lclose
@@ -87,6 +94,7 @@ function s:CreateCallbacks()
 
     function callbacks.failure() closure
         let self._hasExited = 1
+        let self._exitSuccess = 0
 
         call setloclist(winnr, locList, 'r')
         if latte#Config('extend_syntastic') && exists('g:SyntasticLoclist')
