@@ -87,6 +87,12 @@ function s:CreateCallbacks()
         call s:EchoBar('stat', line)
     endfunction
 
+    function callbacks.stderr(msg) closure
+        " TODO distinguish stderr and stdout
+        echom "latte: " . a:msg
+        call add(stdout, a:msg)
+    endfunction
+
     function callbacks.stdout(msg) closure
         echom "latte: " . a:msg
         call add(stdout, a:msg)

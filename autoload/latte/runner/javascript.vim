@@ -3,6 +3,10 @@ function! s:MochaRunner() dict
 
     let run = latte#util#NewRunState()
 
+    function! OnError(channel, msg) closure
+        call self.stderr(a:msg)
+    endfunction
+
     function! OnOutput(channel, msg) closure
         try
             let line = json_decode(a:msg)
@@ -45,6 +49,7 @@ function! s:MochaRunner() dict
 
     let opts = {'out_mode': 'nl',
               \ 'out_cb': 'OnOutput',
+              \ 'err_cb': 'OnError',
               \ 'exit_cb': 'OnExit'}
     let file = expand('%:p')
     let job = job_start(['mocha', '--reporter=json-stream', file], opts)
