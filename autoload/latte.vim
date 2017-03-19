@@ -34,6 +34,8 @@ function s:CreateCallbacks()
     let winnr = winnr()
     let bufnr = bufnr('')
     let filename = expand('%')
+    let errorsByLine = {}
+    let stdout = []
 
     let callbacks = {
                 \ 'file': filename,
@@ -41,7 +43,19 @@ function s:CreateCallbacks()
                 \ }
 
     function callbacks.lineError(line, col, error, extra) closure
-        " TODO put `extra` somewhere?
+        if !has_key(errorsByLine, a:line)
+            let errorsByLine[a:line] = []
+        endif
+
+        call add(errorsByLine[a:line], {
+                \ 'text': a:error,
+                \ 'extra': a:extra})
+
+        if len(a:extra)
+            call add(stdout, a:error)
+            call add(stdout, a:extra)
+        endif
+
         call add(locList, {
                 \ 'filename': filename,
                 \ 'bufnr': bufnr,
@@ -73,8 +87,9 @@ function s:CreateCallbacks()
         call s:EchoBar('stat', line)
     endfunction
 
-    function callbacks.stdout(msg)
-        " TODO: do something with stdout
+    function callbacks.stdout(msg) closure
+        echom "latte: " . a:msg
+        call add(stdout, a:msg)
     endfunction
 
     function callbacks.success(...)
@@ -83,6 +98,7 @@ function s:CreateCallbacks()
 
         echo ""
         lclose
+        pclose
 
         let msg = "All tests passed!"
         if a:0
@@ -120,6 +136,16 @@ function s:CreateCallbacks()
         else
             " TODO
             call s:EchoBar('fail', 'Error')
+        endif
+
+        if len(stdout)
+            " join it all into a string now to avoid
+            " lots of concatenations, but also handle
+            " newlines in output correctly
+            let output = join(stdout, "\n")
+            call latte#util#Preview('Test run output', output)
+        else
+            pclose
         endif
 
     endfunction
