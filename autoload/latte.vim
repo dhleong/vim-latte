@@ -42,7 +42,12 @@ function s:CreateCallbacks()
                 \ '_hasExited': 0
                 \ }
 
-    function callbacks.lineError(line, col, error, extra) closure
+    function callbacks.lineError(line, col, error, extra, ...) closure
+        " Optional Param:
+        " - "printErrorWithExtra" (default: True)
+
+        let printErrorWithExtra = a:0 && a:1
+
         if !has_key(errorsByLine, a:line)
             let errorsByLine[a:line] = []
         endif
@@ -52,7 +57,10 @@ function s:CreateCallbacks()
                 \ 'extra': a:extra})
 
         if len(a:extra)
-            call add(stdout, a:error)
+            if printErrorWithExtra
+                call add(stdout, a:error)
+            endif
+
             call add(stdout, a:extra)
         endif
 
@@ -89,13 +97,17 @@ function s:CreateCallbacks()
 
     function callbacks.stderr(msg) closure
         " TODO distinguish stderr and stdout
-        echom "latte: " . a:msg
-        call add(stdout, a:msg)
+        if len(a:msg)
+            echom "latte: " . a:msg
+            call add(stdout, a:msg)
+        endif
     endfunction
 
     function callbacks.stdout(msg) closure
-        echom "latte: " . a:msg
-        call add(stdout, a:msg)
+        if len(a:msg)
+            echom "latte: " . a:msg
+            call add(stdout, a:msg)
+        endif
     endfunction
 
     function callbacks.success(...)
