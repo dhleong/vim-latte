@@ -1,0 +1,44 @@
+vim-latte
+=========
+
+*A pleasant companion for unit testing*
+
+## What
+
+vim-latte is an asynchronous unit test runner for Vim. It is designed to keep you
+get out of your way when everything is fine, and do the helpful things you'd expect
+when it isn't.
+
+If all the tests for a file pass, vim-latte will echo a nice "All tests passed"
+message in green in your status line. If there were errors, vim-latte will fill
+the location list with the locations, hop to the first one, and open a preview
+window with any relevant output.
+
+Currently, vim-latte has support for:
+
+- Javascript ([mocha](https://mochajs.org/))
+- Python ([py.test](http://pytest.org))
+
+## How
+
+Install with your favorite plugin manager. I like [Plug](https://github.com/junegunn/vim-plug)
+
+```vim
+Plug 'dhleong/vim-latte'
+```
+
+Then, just invoke using `:call latte#Run()`.
+
+vim-latte doesn't provide any mappings or autocmds by default, because everybody
+does things differently. Here's my autocmd for javascript (in an ftplugin):
+
+```vim
+if expand('%') =~# '-test.js$'
+    augroup RunLatte
+        autocmd!
+        autocmd BufWritePost <buffer> :call latte#Run()
+    augroup END
+endif
+```
+
+This will automatically run the test whenever I save the test file.
