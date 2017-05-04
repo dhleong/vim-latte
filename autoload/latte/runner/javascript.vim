@@ -36,11 +36,10 @@ function! s:MochaRunner() dict
                 let col = match[2]
                 call self.lineError(lnum, col, info.err, info.stack)
             else
-                call self.stderr(' ')
                 call self.stderr(info.fullTitle)
                 call self.stderr(repeat('=', len(info.fullTitle)))
                 call self.stderr(info.err)
-                call self.stderr('')
+                call self.stderr(' ')
             endif
         endif
 
