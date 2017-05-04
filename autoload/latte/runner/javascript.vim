@@ -31,9 +31,14 @@ function! s:MochaRunner() dict
 
             let regex = self.file . ':\([0-9]*\):\([0-9]*\)'
             let match = matchlist(info.stack, regex)
-            let lnum = match[1]
-            let col = match[2]
-            call self.lineError(lnum, col, info.err, info.stack)
+            if len(match)
+                let lnum = match[1]
+                let col = match[2]
+                call self.lineError(lnum, col, info.err, info.stack)
+            else
+                call self.stderr(info.fullTitle)
+                call self.stderr(info.err)
+            endif
         endif
 
         call self.state(run)
