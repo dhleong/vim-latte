@@ -1,6 +1,11 @@
 
-function! s:MochaRunner() dict
+function! latte#runner#javascript#runMocha(self, mochaArgs)
+    " Shared implementation for mocha-based runners
+    " Arguments:
+    " - "self" The self implicit var for the parent dict function
+    " - "mochaArgs" List of extra args to pass to mocha
 
+    let self = a:self
     let run = latte#util#NewRunState()
 
     function! OnError(channel, msg) closure
@@ -59,7 +64,14 @@ function! s:MochaRunner() dict
               \ 'err_cb': 'OnError',
               \ 'exit_cb': 'OnExit'}
     let file = expand('%:p')
-    let job = job_start(['mocha', '--reporter=json-stream', file], opts)
+    let job = job_start(
+                \ ['mocha'] + a:mochaArgs +
+                \ ['--reporter=json-stream', file],
+                \ opts)
+endfunction
+
+function! s:MochaRunner() dict
+    return latte#runner#javascript#runMocha(self, [])
 endfunction
 
 function! latte#runner#javascript#Runner()
