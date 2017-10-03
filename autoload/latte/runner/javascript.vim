@@ -45,6 +45,7 @@ function! latte#runner#javascript#runMocha(self, mochaArgs)
                 call self.stderr(repeat('=', len(info.fullTitle)))
                 call self.stderr(info.err)
                 call self.stderr(' ')
+                call self.stderr(info.stack)
             endif
         endif
 
