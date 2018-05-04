@@ -16,8 +16,10 @@ window with any relevant output.
 
 Currently, vim-latte has support for:
 
+- Go ([go test](https://golang.org/cmd/go/#hdr-Test_packages))
 - Javascript ([mocha](https://mochajs.org/))
 - Python ([py.test](http://pytest.org))
+- Typescript ([mocha](https://mochajs.org/))
 
 ## How
 
