@@ -12,21 +12,21 @@ let s:config_defaults = {
     \ }
 
 function s:EchoBar(type, msg)
-    if a:type == 'fail'
+    if a:type ==# 'fail'
         echohl FailBar
-    elseif a:type == 'pass'
+    elseif a:type ==# 'pass'
         echohl PassBar
-    elseif a:type == 'stat'
+    elseif a:type ==# 'stat'
         echohl StatBar
     endif
 
     " clear anything old out
-    echo ""
+    echo ''
 
     let oldshowcmd = &showcmd
     set noshowcmd
     redraw!
-    echon a:msg repeat(" ", &columns - strlen(a:msg) - 1)
+    echon a:msg repeat(' ', &columns - strlen(a:msg) - 1)
     echohl None
     let &showcmd = oldshowcmd
 endfunction
@@ -116,11 +116,11 @@ function s:CreateCallbacks()
         let self._hasExited = 1
         let self._exitSuccess = 1
 
-        echo ""
+        echo ''
         lclose
         pclose
 
-        let msg = "All tests passed!"
+        let msg = 'All tests passed!'
         if a:0
             let msg = a:1
         endif

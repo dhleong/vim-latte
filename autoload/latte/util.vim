@@ -6,7 +6,7 @@ function! latte#util#Preview(name, contents) " {{{
     "  - "contents" A string or array of strings
 
     let contents = a:contents
-    let name = substitute(a:name, " ", '\\ ', "g")
+    let name = substitute(a:name, ' ', '\\ ', 'g')
     exe 'pedit +:call\ s:FillWindow(contents) ' . name
 endfunction " }}}
 
@@ -35,7 +35,7 @@ function! s:FillWindow(contents) " {{{
     " prepare contents
     let contents = a:contents
 
-    if type(contents) == type("")
+    if type(contents) == type('')
         " convert to an array, safely
         let asStr = contents
         unlet contents

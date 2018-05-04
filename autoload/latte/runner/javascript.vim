@@ -27,11 +27,11 @@ function! latte#runner#javascript#runMocha(self, mochaArgs)
 
         let type = line[0]
         let info = line[1]
-        if type == 'start'
+        if type ==# 'start'
             let run.total = info.total
-        elseif type == 'pass'
+        elseif type ==# 'pass'
             call run.pass()
-        elseif type == 'fail'
+        elseif type ==# 'fail'
             call run.fail()
 
             let regex = self.file . ':\([0-9]*\):\([0-9]*\)'
