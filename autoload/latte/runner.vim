@@ -9,7 +9,7 @@ function latte#runner#Get()
     let auto_runner = 'latte#runner#' . ft . '#Runner'
     let Fn = function(auto_runner)
     if Fn == 0
-        throw "No runner found for `" . ft . "`"
+        throw 'No runner found for `' . ft . '`'
     endif
 
     try
@@ -19,7 +19,7 @@ function latte#runner#Get()
         return Result
     catch /^Vim\%((\a\+)\)\=:E117/
         " 'Unknown function'
-        throw "No runner found for `" . ft . "`"
+        throw 'No runner found for `' . ft . '`'
     endtry
 endfunction
 

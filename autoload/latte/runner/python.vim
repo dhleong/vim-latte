@@ -1,6 +1,6 @@
 
-let s:cwdir = expand("<sfile>:p:h")
-let s:pytest_runner = s:cwdir . "/python/pytest-runner.py"
+let s:cwdir = expand('<sfile>:p:h')
+let s:pytest_runner = s:cwdir . '/python/pytest-runner.py'
 
 function! s:PyTestRunner() dict
 
@@ -13,7 +13,7 @@ function! s:PyTestRunner() dict
         if a:msg.allPassed
             call self.success()
         else
-            if a:msg.extra != ''
+            if a:msg.extra !=# ''
                 call self.stdout(a:msg.extra)
             endif
             call self.failure()
@@ -56,7 +56,7 @@ function! s:PyTestRunner() dict
             " just pass along to the callback
             call call(callbacks[line.t], [line], self)
         else
-            echom "Unknown callback type " . line.t
+            echom 'Unknown callback type ' . line.t
         endif
     endfunction
 

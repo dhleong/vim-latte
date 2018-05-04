@@ -5,7 +5,9 @@ hi PassBar term=reverse ctermfg=white ctermbg=green guifg=#f0f0f0 guibg=#00bb00
 hi StatBar term=reverse ctermfg=white ctermbg=green guifg=#f0f0f0 guibg=#333333
 
 let s:config_defaults = {
+    \ 'extend_ale': 1,
     \ 'extend_syntastic': 1,
+    \ 'list_open': 0,
     \ 'jump_to_error': 1,
     \ }
 
@@ -98,14 +100,14 @@ function s:CreateCallbacks()
     function callbacks.stderr(msg) closure
         " TODO distinguish stderr and stdout
         if len(a:msg)
-            echom "latte: " . a:msg
+            echom 'latte: ' . a:msg
             call add(stdout, a:msg)
         endif
     endfunction
 
     function callbacks.stdout(msg) closure
         if len(a:msg)
-            echom "latte: " . a:msg
+            echom 'latte: ' . a:msg
             call add(stdout, a:msg)
         endif
     endfunction
@@ -142,7 +144,9 @@ function s:CreateCallbacks()
             call g:SyntasticSignsNotifier.refresh(list)
         else
             " TODO draw markers
-            lopen
+            if latte#Config('list_open')
+                lopen
+            endif
         endif
 
         if len(locList)
