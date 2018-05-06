@@ -1,25 +1,41 @@
 
-function latte#runner#Get()
-    let ft = &filetype
+function! s:runnerForId(id)
     let runners = get(g:, 'latte#runners', {})
-    if has_key(runners, ft)
-        return runners[ft]
+    if has_key(runners, a:id)
+        return runners[a:id]
     endif
 
-    let auto_runner = 'latte#runner#' . ft . '#Runner'
-    let Fn = function(auto_runner)
-    if Fn == 0
-        throw 'No runner found for `' . ft . '`'
-    endif
-
+    " autodetect based on presence of runner function
+    let name = 'latte#runner#' . a:id . '#Runner'
     try
-        " NOTE: we have to call it on a separate line like this
-        " so vim is happy
-        let Result = Fn()
-        return Result
+        let Fn = function(name)
+        return Fn()
     catch /^Vim\%((\a\+)\)\=:E117/
         " 'Unknown function'
-        throw 'No runner found for `' . ft . '`'
+        return 0
     endtry
+endfunction
+
+function! latte#runner#Get()
+    let ft = &filetype
+    let Fn = s:runnerForId(ft)
+    if Fn != 0
+        return Fn
+    endif
+
+    " eg: javascript.jsx
+    let dot = stridx(ft, '.')
+    if dot != -1
+        let altFt = ft[:(dot - 1)]
+        let Fn = s:runnerForId(altFt)
+
+        if Fn == 0
+            throw 'No runner found for `' . ft . '` or `' . altFt . '`'
+        endif
+
+        return Fn
+    endif
+
+    throw 'No runner found for `' . ft . '`'
 endfunction
 
