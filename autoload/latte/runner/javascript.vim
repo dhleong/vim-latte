@@ -113,7 +113,7 @@ function! latte#runner#javascript#runMocha(self, mochaArgs)
                 let col = match[2]
                 let diff = ''
 
-                if info.err.showDiff
+                if get(info.err, 'showDiff', 0)
                     let diff = "\n\n" . s:computeDiff(info.err.actual, info.err.expected)
                 endif
 
