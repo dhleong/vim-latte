@@ -61,7 +61,7 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) "{{{
     endfunction
 
     function! OnExit(channel, exitCode) closure
-        if a:exitCode == 0
+        if a:exitCode == 0 && run.failed == 0
             call self.success()
         else
             call self.failure()
