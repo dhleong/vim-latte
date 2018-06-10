@@ -2,6 +2,12 @@
 let s:cwdir = expand('<sfile>:p:h')
 let s:mocha_runner = s:cwdir . '/javascript/mocha-runner.js'
 
+function! s:cleanStack(stack)
+    let result = substitute(a:stack, '[ ]*at Proxy\..*/chai/.*\n', '', 'g')
+    let result = substitute(result, '[ ]*at <anonymous>$', '', 'g')
+    return trim(result)
+endfunction
+
 function! latte#runner#javascript#runMocha(self, mochaArgs) "{{{
     " Old implementation for mocha-based runners, using json-stream
     " Arguments:
@@ -47,13 +53,13 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) "{{{
                     let diff = "\n\n" . s:computeDiff(info.actual, info.expected)
                 endif
 
-                call self.lineError(lnum, col, info.err, info.stack . diff)
+                call self.lineError(lnum, col, info.err, s:cleanStack(info.stack) . diff)
             else
                 call self.stderr(info.fullTitle)
                 call self.stderr(repeat('=', len(info.fullTitle)))
                 call self.stderr(info.err)
                 call self.stderr(' ')
-                call self.stderr(info.stack)
+                call self.stderr(s:cleanStack(info.stack))
             endif
         endif
 

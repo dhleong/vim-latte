@@ -84,6 +84,8 @@ function clean(test) {
  * @return {Object}
  */
 function cleanCycles(obj) {
+    if (!obj) return;
+
     var cache = [];
     return JSON.parse(
         JSON.stringify(obj, function(key, value) {
