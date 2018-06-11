@@ -81,10 +81,8 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
                 let col = match[2]
                 let diff = ''
 
-                if get(info, 'showDiff', 0)
-                    let diff = "\n\n" . s:computeDiff(
-                        \ get(info, 'actual', ''),
-                        \ get(info, 'expected', ''))
+                if get(info, 'showDiff', 0) && has_key(info, 'actual') && has_key(info, 'expected')
+                    let diff = "\n\n" . s:computeDiff(info.actual, info.expected)
                 endif
 
                 call self.lineError(lnum, col, info.err, s:cleanStack(info.stack) . diff)
