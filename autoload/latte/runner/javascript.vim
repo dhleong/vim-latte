@@ -8,11 +8,37 @@ function! s:cleanStack(stack)
     return trim(result)
 endfunction
 
-function! latte#runner#javascript#runMocha(self, mochaArgs) "{{{
+function! s:MochaExe()
+    let cwd = expand('%:p:h')
+    while len(cwd) > 3
+        let nodeModuleBinPath = cwd . '/node_modules/.bin/mocha'
+        if executable(nodeModuleBinPath)
+            return nodeModuleBinPath
+        endif
+
+        let cwd = fnamemodify(cwd, ':h')
+    endwhile
+
+    if executable('mocha')
+        return 'mocha'
+    endif
+
+    return ''
+endfunction
+
+function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
     " Old implementation for mocha-based runners, using json-stream
     " Arguments:
     " - "self" The self implicit var for the parent dict function
     " - "mochaArgs" List of extra args to pass to mocha
+
+    let mocha = s:MochaExe()
+    if mocha == ''
+        redraw!
+        echo 'latte: No mocha executable found'
+        return
+    endif
+
 
     let self = a:self
     let run = latte#util#NewRunState()
@@ -48,9 +74,12 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) "{{{
             if len(match)
                 let lnum = match[1]
                 let col = match[2]
+                let diff = ''
 
                 if get(info, 'showDiff', 0)
-                    let diff = "\n\n" . s:computeDiff(info.actual, info.expected)
+                    let diff = "\n\n" . s:computeDiff(
+                        \ get(info, 'actual', ''),
+                        \ get(info, 'expected', ''))
                 endif
 
                 call self.lineError(lnum, col, info.err, s:cleanStack(info.stack) . diff)
@@ -80,10 +109,10 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) "{{{
               \ 'exit_cb': 'OnExit'}
     let file = expand('%:p')
     let job = job_start(
-                \ ['mocha'] + a:mochaArgs +
+                \ [mocha] + a:mochaArgs +
                 \ ['--reporter=' . s:mocha_runner, file],
                 \ opts)
-endfunction"}}}
+endfunction " }}}
 
 function s:computeDiff(actual, expected)
     " TODO fancy diff
@@ -96,6 +125,10 @@ function! s:MochaRunner() dict
 endfunction
 
 function! latte#runner#javascript#Runner()
+    if s:MochaExe() != ''
+        return function('s:MochaRunner')
+    endif
+
+    echom "No runners available"
     " TODO other runners?
-    return function('s:MochaRunner')
 endfunction

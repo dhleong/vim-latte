@@ -11,8 +11,6 @@
  * Module dependencies.
  */
 
-var Base = require('mocha').reporters.Base;
-
 /**
  * Expose `List`.
  */
@@ -31,7 +29,8 @@ exports = module.exports = List;
  * @param {Runner} runner
  */
 function List(runner) {
-    Base.call(this, runner);
+    // var Base = require('mocha').reporters.Base;
+    // Base.call(this, runner);
 
     var self = this;
     var total = runner.total;
