@@ -58,6 +58,9 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
         if type(line) == v:t_none
             call self.stdout(a:msg)
             return
+        elseif type(line) != type([])
+            call self.stdout(string(a:msg))
+            return
         endif
 
         let type = line[0]
@@ -90,6 +93,8 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
                 call self.stderr(' ')
                 call self.stderr(s:cleanStack(info.stack))
             endif
+        else
+            call self.stdout(string(line))
         endif
 
         call self.state(run)
