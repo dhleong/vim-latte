@@ -23,10 +23,20 @@ function s:EchoBar(type, msg)
     " clear anything old out
     echo ''
 
+    let message = a:msg
+    if len(message) >= &columns - 1
+        " take the *last* text since that seems to be the most likely place
+        " for relevant messages (maybe not always though...?)
+        let start = len(message) - &columns - 2
+        let message = message[start:]
+    else
+        let message = message . repeat(' ', &columns - strlen(message) - 1)
+    endif
+
     let oldshowcmd = &showcmd
     set noshowcmd
     redraw!
-    echon a:msg repeat(' ', &columns - strlen(a:msg) - 1)
+    echom message
     echohl None
     let &showcmd = oldshowcmd
 endfunction
@@ -149,6 +159,16 @@ function s:CreateCallbacks()
             endif
         endif
 
+        if len(stdout)
+            " join it all into a string now to avoid
+            " lots of concatenations, but also handle
+            " newlines in output correctly
+            let output = join(stdout, "\n")
+            call latte#util#Preview('Test run output', output)
+        else
+            pclose
+        endif
+
         if len(locList)
             let firstError = locList[0]
             call s:EchoBar('fail', firstError.text)
@@ -158,16 +178,6 @@ function s:CreateCallbacks()
         else
             " TODO
             call s:EchoBar('fail', 'Error')
-        endif
-
-        if len(stdout)
-            " join it all into a string now to avoid
-            " lots of concatenations, but also handle
-            " newlines in output correctly
-            let output = join(stdout, "\n")
-            call latte#util#Preview('Test run output', output)
-        else
-            pclose
         endif
 
     endfunction
