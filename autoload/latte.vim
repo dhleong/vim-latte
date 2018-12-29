@@ -44,6 +44,7 @@ endfunction
 function s:CreateCallbacks()
     let locList = []
     let winnr = winnr()
+    let tabnr = tabpagenr()
     let bufnr = bufnr('')
     let filename = expand('%')
     let errorsByLine = {}
@@ -141,9 +142,11 @@ function s:CreateCallbacks()
     function callbacks.failure() closure
         let self._hasExited = 1
         let self._exitSuccess = 0
+        let inSameWindow = winnr() == winnr
+        let inSameTab = tabpagenr() == tabnr
 
         call setloclist(winnr, locList, 'r')
-        if latte#Config('extend_syntastic') && exists('g:SyntasticLoclist')
+        if latte#Config('extend_syntastic') && exists('g:SyntasticLoclist') && inSameWindow
             let list = g:SyntasticLoclist.New(locList)
             let b:latte_last_list = list
 
@@ -159,17 +162,17 @@ function s:CreateCallbacks()
             endif
         endif
 
-        if len(stdout)
+        if len(stdout) && inSameTab
             " join it all into a string now to avoid
             " lots of concatenations, but also handle
             " newlines in output correctly
             let output = join(stdout, "\n")
             call latte#util#Preview('Test run output', output)
-        else
+        elseif inSameTab
             pclose
         endif
 
-        if len(locList)
+        if len(locList) && inSameWindow
             let firstError = locList[0]
             call s:EchoBar('fail', firstError.text)
             if latte#Config('jump_to_error')
