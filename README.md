@@ -40,7 +40,15 @@ if expand('%') =~# '-test.js$'
         autocmd!
         autocmd BufWritePost <buffer> :call latte#Run()
     augroup END
+else
+    augroup TryRunLatte
+        autocmd!
+        autocmd BufWritePost <buffer> :call latte#TryRun()
+    augroup END
 endif
 ```
 
-This will automatically run the test whenever I save the test file.
+This will automatically run the test whenever I save the test file. The
+`latte#TryRun()` function will try to find a previously-executed test window
+in the current tabpage and run that, so I can see the results of changes to
+a relevant file as soon as I save it.

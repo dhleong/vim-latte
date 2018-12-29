@@ -11,7 +11,7 @@ let s:config_defaults = {
     \ 'jump_to_error': 1,
     \ }
 
-function s:EchoBar(type, msg)
+function! s:EchoBar(type, msg) " {{{
     if a:type ==# 'fail'
         echohl FailBar
     elseif a:type ==# 'pass'
@@ -39,9 +39,9 @@ function s:EchoBar(type, msg)
     echom message
     echohl None
     let &showcmd = oldshowcmd
-endfunction
+endfunction " }}}
 
-function s:CreateCallbacks()
+function! s:CreateCallbacks() " {{{
     let locList = []
     let winnr = winnr()
     let tabnr = tabpagenr()
@@ -136,6 +136,11 @@ function s:CreateCallbacks()
             let msg = a:1
         endif
 
+        let inSameTab = tabpagenr() == tabnr
+        if inSameTab
+            call setbufvar(bufnr, 'latte_ran', 1)
+        endif
+
         call s:EchoBar('pass', msg)
     endfunction
 
@@ -144,6 +149,10 @@ function s:CreateCallbacks()
         let self._exitSuccess = 0
         let inSameWindow = winnr() == winnr
         let inSameTab = tabpagenr() == tabnr
+
+        if inSameTab
+            call setbufvar(bufnr, 'latte_ran', 1)
+        endif
 
         call setloclist(winnr, locList, 'r')
         if latte#Config('extend_syntastic') && exists('g:SyntasticLoclist') && inSameWindow
@@ -186,9 +195,9 @@ function s:CreateCallbacks()
     endfunction
 
     return callbacks
-endfunction
+endfunction " }}}
 
-function! latte#Run()
+function! latte#Run() " {{{
     if exists('b:latte_last_list')
         " cleanup
         call g:SyntasticHighlightingNotifier.reset(b:latte_last_list)
@@ -198,10 +207,30 @@ function! latte#Run()
     let callbacks = s:CreateCallbacks()
     let callbacks.Run = Runner
     call callbacks.Run()
-endfunction
+endfunction " }}}
 
-function! latte#Config(configName)
+" Looks for a test file on the current tabpage and tries to call latte#Run()
+" in it
+function! latte#TryRun() " {{{
+    for nr in range(1, winnr('$'))
+        let bufnr = winbufnr(nr)
+        if bufnr != -1 && getbufvar(bufnr, 'latte_ran', 0)
+            " re-run
+            let oldWinnr = winnr()
+            exe nr . 'wincmd w'
+            call latte#Run()
+
+            " restore active window
+            exe oldWinnr . 'wincmd w'
+
+            " done!
+            return
+        endif
+    endfor
+endfunc " }}}
+
+function! latte#Config(configName) " {{{
     let prefixed = 'latte_' . a:configName
     return get(b:, prefixed,
         \ get(g:, prefixed, s:config_defaults[a:configName]))
-endfunction
+endfunction " }}}
