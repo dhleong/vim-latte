@@ -69,6 +69,8 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
             let run.total = info.total
         elseif type ==# 'pass'
             call run.pass()
+        elseif type ==# 'end'
+            " just nop
         elseif type ==# 'fail'
             call run.fail()
 
