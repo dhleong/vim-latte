@@ -123,7 +123,7 @@ function! s:CreateCallbacks() " {{{
         endif
     endfunction
 
-    function callbacks.success(...)
+    function callbacks.success(...) closure
         let self._hasExited = 1
         let self._exitSuccess = 1
 
