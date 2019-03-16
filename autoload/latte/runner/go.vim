@@ -72,7 +72,7 @@ function! s:GoTestRunner() dict
               \ 'err_cb': 'OnError',
               \ 'exit_cb': 'OnExit'}
     let file = expand('%:p')
-    let job = job_start(['go', 'test', '.', '-json'], opts)
+    return job_start(['go', 'test', '.', '-json'], opts)
 endfunction
 
 function! latte#runner#go#Runner()
