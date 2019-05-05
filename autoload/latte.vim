@@ -28,7 +28,7 @@ function! s:EchoBar(type, msg) " {{{
         " take the *last* text since that seems to be the most likely place
         " for relevant messages (maybe not always though...?)
         let start = len(message) - &columns - 2
-        let message = message[start:]
+        let message = message[start :]
     else
         let message = message . repeat(' ', &columns - strlen(message) - 1)
     endif
@@ -206,6 +206,9 @@ function! latte#Run() " {{{
     let Runner = latte#runner#Get()
     let callbacks = s:CreateCallbacks()
     let callbacks.Run = Runner
+
+    call s:EchoBar('stat', 'latte: Running test...')
+
     call callbacks.Run()
 endfunction " }}}
 
