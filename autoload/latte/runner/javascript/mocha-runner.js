@@ -71,7 +71,7 @@ function clean(test) {
         title: test.title,
         fullTitle: test.fullTitle(),
         duration: test.duration,
-        currentRetry: test.currentRetry()
+        currentRetry: test.currentRetry(),
     };
 }
 
@@ -84,19 +84,28 @@ function clean(test) {
  */
 function cleanCycles(obj) {
     if (!obj) return;
+    if (typeof obj !== "object" && !Array.isArray(obj)) {
+        // not an object or an array; it probably can't be JSON-ified,
+        // and we should be okay anyway.
+        return obj;
+    }
 
     var cache = [];
-    return JSON.parse(
-        JSON.stringify(obj, function(key, value) {
-            if (typeof value === 'object' && value !== null) {
-                if (cache.indexOf(value) !== -1) {
-                    // Instead of going in a circle, we'll print [object Object]
-                    return '' + value;
+    try {
+        return JSON.parse(
+            JSON.stringify(obj, function(key, value) {
+                if (typeof value === 'object' && value !== null) {
+                    if (cache.indexOf(value) !== -1) {
+                        // Instead of going in a circle, we'll print [object Object]
+                        return '' + value;
+                    }
+                    cache.push(value);
                 }
-                cache.push(value);
-            }
 
-            return value;
-        })
-    );
+                return value;
+            })
+        );
+    } catch (e) {
+        throw new Error(`Failed to clean cycles from ${obj}:\n` + e.stack);
+    }
 }
