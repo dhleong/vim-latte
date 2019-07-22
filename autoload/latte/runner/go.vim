@@ -3,6 +3,7 @@
 function! s:GoTestRunner() dict
 
     let run = latte#util#NewRunState()
+    let outputByTest = {}
 
     " TODO filter results by tests declared
     " in the file we're editing?
@@ -11,12 +12,18 @@ function! s:GoTestRunner() dict
     " test runner callbacks
     let callbacks = {}
     function callbacks.run(msg) closure
-        if get(a:msg, 'Test', '') !=# ''
+        let testName = get(a:msg, 'Test', '')
+        if testName !=# ''
+            let outputByTest[testName] = []
             let run.total = run.total + 1
         endif
     endfunction
     function callbacks.fail(msg) closure
-        if get(a:msg, 'Test', '') !=# ''
+        let testName = get(a:msg, 'Test', '')
+        if testName !=# ''
+            for line in outputByTest[testName]
+                call self.stdout(line)
+            endfor
             call run.fail()
             call self.state(run)
         endif
@@ -29,9 +36,14 @@ function! s:GoTestRunner() dict
     endfunction
 
     function callbacks.output(msg) closure
-        " TODO associate output with the specific test?
         let trimmed = substitute(a:msg.Output, '\n$', '', '')
-        call self.stdout(trimmed)
+        let testName = get(a:msg, 'Test', '')
+        if testName !=# ''
+            " associate output with the specific test
+            call add(outputByTest[a:msg.Test], trimmed)
+        else
+            call self.stdout(trimmed)
+        endif
     endfunction
 
     "
