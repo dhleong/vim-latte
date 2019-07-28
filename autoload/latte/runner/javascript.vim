@@ -33,7 +33,7 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
     " - "mochaArgs" List of extra args to pass to mocha
 
     let mocha = s:MochaExe()
-    if mocha == ''
+    if mocha ==# ''
         redraw!
         echo 'latte: No mocha executable found'
         return
@@ -91,6 +91,12 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
                 call self.stderr(repeat('=', len(info.fullTitle)))
                 call self.stderr(info.err)
                 call self.stderr(' ')
+
+                if has_key(info, 'actual') && has_key(info, 'expected')
+                    call self.stderr(s:computeDiff(info.actual, info.expected))
+                    call self.stderr(' ')
+                endif
+
                 call self.stderr(s:cleanStack(info.stack))
             endif
         else
@@ -130,10 +136,10 @@ function! s:MochaRunner() dict
 endfunction
 
 function! latte#runner#javascript#Runner()
-    if s:MochaExe() != ''
+    if s:MochaExe() !=# ''
         return function('s:MochaRunner')
     endif
 
-    echom "No runners available"
+    echom 'No runners available'
     " TODO other runners?
 endfunction
