@@ -61,6 +61,9 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
         elseif type(line) != type([])
             call self.stdout(string(a:msg))
             return
+        elseif len(line) < 2
+            call self.stdout(string(a:msg))
+            return
         endif
 
         let type = line[0]
