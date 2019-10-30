@@ -215,16 +215,23 @@ endfunction " }}}
 " Looks for a test file on the current tabpage and tries to call latte#Run()
 " in it
 function! latte#TryRun() " {{{
+    let sourceWin = winnr()
     for nr in range(1, winnr('$'))
+        if nr == sourceWin
+            " don't TryRun in the current window; that's what Run is for
+            continue
+        endif
+
         let bufnr = winbufnr(nr)
         if bufnr != -1 && getbufvar(bufnr, 'latte_ran', 0)
             " re-run
-            let oldWinnr = winnr()
             exe nr . 'wincmd w'
+
+            " start
             call latte#Run()
 
             " restore active window
-            exe oldWinnr . 'wincmd w'
+            exe sourceWin . 'wincmd w'
 
             " done!
             return
