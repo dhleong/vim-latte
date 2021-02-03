@@ -13,6 +13,10 @@ function! s:RustTestRunner() dict
 
     " filter results by tests declared in the file we're editing
     let cratePath = split(file[srcIndex + 4:], '/')
+    if len(cratePath) && cratePath[-1] ==# 'mod'
+        let cratePath = cratePath[:-2]
+    endif
+
     let pathFilter = [ join(cratePath, '::') ]
 
     "
