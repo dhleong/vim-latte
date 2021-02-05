@@ -60,11 +60,15 @@ function! s:PyTestRunner() dict
         endif
     endfunction
 
+    let exe = 'python'
+    let exe = get(g:, 'latte_python_exe', exe)
+    let exe = get(b:, 'latte_python_exe', exe)
+
     let opts = {'out_mode': 'nl',
-              \ 'out_cb': 'OnOutput',
-              \ 'err_cb': 'OnError'}
+              \ 'out_cb': 'OnError',
+              \ 'err_cb': 'OnOutput'}
     let file = expand('%:p')
-    let job = job_start(['python', s:pytest_runner, file], opts)
+    let job = job_start([exe, s:pytest_runner, file], opts)
 endfunction
 
 function! latte#runner#python#Runner()

@@ -16,7 +16,7 @@ EXIT_NOTESTSCOLLECTED = 5
 
 
 def printJson(obj):
-    print(json.dumps(obj))
+    sys.stderr.write(json.dumps(obj) + '\n')
 
 
 class LattePlugin:
@@ -82,6 +82,7 @@ class LattePlugin:
     def pytest_terminal_summary(self, terminalreporter):
         # do nothing
         pass
+
 
 testFile = sys.argv[1]
 pytest.main(['-qq', testFile], plugins=[LattePlugin()])
