@@ -138,6 +138,7 @@ function! s:CreateCallbacks() " {{{
 
         let inSameTab = tabpagenr() == tabnr
         if inSameTab
+            call setbufvar(bufnr, 'latte_failed', 0)
             call setbufvar(bufnr, 'latte_ran', 1)
         endif
 
@@ -151,6 +152,7 @@ function! s:CreateCallbacks() " {{{
         let inSameTab = tabpagenr() == tabnr
 
         if inSameTab
+            call setbufvar(bufnr, 'latte_failed', 1)
             call setbufvar(bufnr, 'latte_ran', 1)
         endif
 
@@ -214,7 +216,8 @@ endfunction " }}}
 
 " Looks for a test file on the current tabpage and tries to call latte#Run()
 " in it
-function! latte#TryRun() " {{{
+function! latte#TryRun(...) " {{{
+    let config = a:0 ? a:1 : {}
     let sourceWin = winnr()
     for nr in range(1, winnr('$'))
         if nr == sourceWin
@@ -224,6 +227,10 @@ function! latte#TryRun() " {{{
 
         let bufnr = winbufnr(nr)
         if bufnr != -1 && getbufvar(bufnr, 'latte_ran', 0)
+            if get(config, 'ifFailed', 0) && !getbufvar(bufnr, 'latte_failed', 0)
+                continue
+            endif
+
             " re-run
             exe nr . 'wincmd w'
 
@@ -234,9 +241,11 @@ function! latte#TryRun() " {{{
             exe sourceWin . 'wincmd w'
 
             " done!
-            return
+            return 1
         endif
     endfor
+
+    return 0
 endfunc " }}}
 
 function! latte#Config(configName) " {{{
