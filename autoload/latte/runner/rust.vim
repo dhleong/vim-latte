@@ -81,6 +81,9 @@ function! s:RustTestRunner() dict
     let opts = {'out_mode': 'nl',
               \ 'out_cb': 'OnOutput',
               \ 'exit_cb': 'OnExit',
+              \ 'env': {
+              \     'RUST_BACKTRACE': 1,
+              \ },
               \ 'cwd': projectRoot}
     return job_start([
         \ 'cargo', 'test',
