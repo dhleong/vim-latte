@@ -18,6 +18,7 @@ function! s:RustTestRunner() dict
     endif
 
     let pathFilter = [ join(cratePath, '::') ]
+    let lineRegex = '\m' . join(cratePath, '/') . '.rs:\([0-9]\+\):\([0-9]\+\)'
 
     "
     " test runner callbacks
@@ -33,6 +34,12 @@ function! s:RustTestRunner() dict
         let testName = get(a:msg, 'name', '')
         if testName !=# ''
             call self.stdout(a:msg.stdout)
+
+            let lineMatch = matchlist(a:msg.stdout, lineRegex)
+            if len(lineMatch) > 3
+                call self.lineError(lineMatch[1], lineMatch[2], 'Error', '')
+            endif
+
             call run.fail()
             call self.state(run)
         endif
