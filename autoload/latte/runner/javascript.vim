@@ -56,7 +56,7 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
         endtry
 
         if type(line) == v:t_none
-            call self.stdout(a:msg)
+            " call self.stdout(a:msg)
             return
         elseif type(line) != type([])
             call self.stdout(string(a:msg))
@@ -128,10 +128,26 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
                 \ opts)
 endfunction " }}}
 
+func s:string(v)
+    if type(a:v) ==# type('')
+        return a:v
+    endif
+
+    return string(a:v)
+endfunc
+
 function s:computeDiff(actual, expected)
     " TODO fancy diff
-    return "Expected:\n  " . string(a:expected) .
-        \  "\n\nActual:\n  " . string(a:actual)
+    let expectedAsString = s:string(a:expected)
+    let actualAsString = s:string(a:actual)
+
+    if count(expectedAsString, "\n") > 0
+        return "Expected:\n" . expectedAsString
+            \. "\n\nActual:\n" . actualAsString
+    endif
+
+    return "Expected:\n  " . expectedAsString
+        \. "\n\nActual:\n  " . actualAsString
 endfunction
 
 function! s:MochaRunner() dict

@@ -35,12 +35,16 @@ function List(runner) {
     var self = this;
     var total = runner.total;
 
+    function emit(type, v) {
+        process.stdout.write("\n" + JSON.stringify([type, v]) + "\n");
+    }
+
     runner.on('start', function() {
-        console.log(JSON.stringify(['start', {total: total}]));
+        emit('start', {total: total});
     });
 
     runner.on('pass', function(test) {
-        console.log(JSON.stringify(['pass', clean(test)]));
+        emit('pass', clean(test));
     });
 
     runner.on('fail', function(test, err) {
@@ -50,11 +54,11 @@ function List(runner) {
         test.actual = cleanCycles(err.actual);
         test.expected = cleanCycles(err.expected);
         test.showDiff = err.showDiff;
-        console.log(JSON.stringify(['fail', test]));
+        emit('fail', test);
     });
 
     runner.once('end', function() {
-        process.stdout.write(JSON.stringify(['end', self.stats]));
+        emit('end', self.stats);
     });
 }
 
