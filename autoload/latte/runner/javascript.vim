@@ -121,6 +121,12 @@ function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
               \ 'out_cb': 'OnOutput',
               \ 'err_cb': 'OnError',
               \ 'exit_cb': 'OnExit'}
+
+    let debug = get(b:, 'DEBUG', '')
+    if debug !=# ''
+        let opts.env = {'DEBUG': debug}
+    endif
+
     let file = expand('%:p')
     let job = job_start(
                 \ [mocha] + a:mochaArgs +
