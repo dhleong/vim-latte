@@ -6,6 +6,10 @@ function! s:MochaRunner() dict
 endfunction
 
 function! latte#runner#typescript#Runner()
-    " TODO other runners?
-    return function('s:MochaRunner')
+    if latte#runner#javascript#MochaExecutable() !=# ''
+        " TODO other runners?
+        return function('s:MochaRunner')
+    endif
+
+    return latte#runner#javascript#Runner()
 endfunction

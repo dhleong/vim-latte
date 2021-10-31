@@ -1,170 +1,27 @@
+func! latte#runner#javascript#JestExecutable() " {{{
+    return latte#util#exe#FindInProject('node_modules/.bin/jest')
+endfunc " }}}
 
-let s:cwdir = expand('<sfile>:p:h')
-let s:mocha_runner = s:cwdir . '/javascript/mocha-runner.js'
+func! latte#runner#javascript#MochaExecutable() " {{{
+    return latte#util#exe#FindInProject('node_modules/.bin/mocha')
+endfunc " }}}
 
-function! s:cleanStack(stack)
-    let result = substitute(a:stack, '[ ]*at Proxy\..*/chai/.*\n', '', 'g')
-    let result = substitute(result, '[ ]*at <anonymous>$', '', 'g')
-    return trim(result)
-endfunction
-
-function! s:MochaExe()
-    let cwd = expand('%:p:h')
-    while len(cwd) > 3
-        let nodeModuleBinPath = cwd . '/node_modules/.bin/mocha'
-        if executable(nodeModuleBinPath)
-            return nodeModuleBinPath
-        endif
-
-        let cwd = fnamemodify(cwd, ':h')
-    endwhile
-
-    if executable('mocha')
-        return 'mocha'
-    endif
-
-    return ''
-endfunction
-
-function! latte#runner#javascript#runMocha(self, mochaArgs) " {{{
-    " Old implementation for mocha-based runners, using json-stream
-    " Arguments:
-    " - "self" The self implicit var for the parent dict function
-    " - "mochaArgs" List of extra args to pass to mocha
-
-    let mocha = s:MochaExe()
-    if mocha ==# ''
-        redraw!
-        echo 'latte: No mocha executable found'
-        return
-    endif
-
-
-    let self = a:self
-    let run = latte#util#NewRunState()
-
-    function! OnError(channel, msg) closure
-        call self.stderr(a:msg)
-    endfunction
-
-    function! OnOutput(channel, msg) closure
-        try
-            let line = json_decode(a:msg)
-        catch
-            call self.stdout(a:msg)
-            return
-        endtry
-
-        if type(line) == v:t_none
-            " call self.stdout(a:msg)
-            return
-        elseif type(line) != type([])
-            call self.stdout(string(a:msg))
-            return
-        elseif len(line) < 2
-            call self.stdout(string(a:msg))
-            return
-        endif
-
-        let type = line[0]
-        let info = line[1]
-        if type ==# 'start'
-            let run.total = info.total
-        elseif type ==# 'pass'
-            call run.pass()
-        elseif type ==# 'end'
-            " just nop
-        elseif type ==# 'fail'
-            call run.fail()
-
-            let regex = self.file . ':\([0-9]*\):\([0-9]*\)'
-            let match = matchlist(info.stack, regex)
-            if len(match)
-                let lnum = match[1]
-                let col = match[2]
-                let diff = ''
-
-                if get(info, 'showDiff', 0) && has_key(info, 'actual') && has_key(info, 'expected')
-                    let diff = "\n\n" . s:computeDiff(info.actual, info.expected)
-                endif
-
-                call self.lineError(lnum, col, info.err, s:cleanStack(info.stack) . diff)
-            else
-                call self.stderr(info.fullTitle)
-                call self.stderr(repeat('=', len(info.fullTitle)))
-                call self.stderr(info.err)
-                call self.stderr(' ')
-
-                if has_key(info, 'actual') && has_key(info, 'expected')
-                    call self.stderr(s:computeDiff(info.actual, info.expected))
-                    call self.stderr(' ')
-                endif
-
-                call self.stderr(s:cleanStack(info.stack))
-            endif
-        else
-            call self.stdout(string(line))
-        endif
-
-        call self.state(run)
-    endfunction
-
-    function! OnExit(channel, exitCode) closure
-        if a:exitCode == 0 && run.failed == 0
-            call self.success()
-        else
-            call self.failure()
-        endif
-    endfunction
-
-    let opts = {'out_mode': 'nl',
-              \ 'out_cb': 'OnOutput',
-              \ 'err_cb': 'OnError',
-              \ 'exit_cb': 'OnExit'}
-
-    let debug = get(b:, 'DEBUG', '')
-    if debug !=# ''
-        let opts.env = {'DEBUG': debug}
-    endif
-
-    let file = expand('%:p')
-    let job = job_start(
-                \ [mocha] + a:mochaArgs +
-                \ ['--reporter=' . s:mocha_runner, file],
-                \ opts)
-endfunction " }}}
-
-func s:string(v)
-    if type(a:v) ==# type('')
-        return a:v
-    endif
-
-    return string(a:v)
+func! s:JestRunner() dict
+    return latte#runner#javascript#jest#Run(self, [])
 endfunc
 
-function s:computeDiff(actual, expected)
-    " TODO fancy diff
-    let expectedAsString = s:string(a:expected)
-    let actualAsString = s:string(a:actual)
+func! s:MochaRunner() dict
+    return latte#runner#javascript#mocha#Run(self, [])
+endfunc
 
-    if count(expectedAsString, "\n") > 0
-        return "Expected:\n" . expectedAsString
-            \. "\n\nActual:\n" . actualAsString
+func! latte#runner#javascript#Runner()
+    if latte#runner#javascript#JestExecutable() !=# ''
+        return function('s:JestRunner')
     endif
 
-    return "Expected:\n  " . expectedAsString
-        \. "\n\nActual:\n  " . actualAsString
-endfunction
-
-function! s:MochaRunner() dict
-    return latte#runner#javascript#runMocha(self, [])
-endfunction
-
-function! latte#runner#javascript#Runner()
-    if s:MochaExe() !=# ''
+    if latte#runner#javascript#MochaExecutable() !=# ''
         return function('s:MochaRunner')
     endif
 
     echom 'No runners available'
-    " TODO other runners?
-endfunction
+endfunc

@@ -1,6 +1,6 @@
 
 function! s:runnerForId(id)
-    let runners = get(g:, 'latte#runners', {})
+    let runners = get(b:, 'latte#runners', {})
     if has_key(runners, a:id)
         return runners[a:id]
     endif
